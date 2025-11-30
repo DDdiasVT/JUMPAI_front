@@ -3,183 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JumpPro Analytics - Análise de Salto com IA</title>
+    <title>JumpPro Analytics</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-        .gradient-text { background: linear-gradient(to right, #3b82f6, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .glass-card { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); }
-        .loader { border-top-color: #3b82f6; -webkit-animation: spinner 1.5s linear infinite; animation: spinner 1.5s linear infinite; }
-        @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    </style>
 </head>
 <body class="bg-gray-50 text-gray-800 antialiased min-h-screen flex flex-col">
 
-    <!-- Header -->
     <header class="w-full py-6 px-4 bg-white shadow-sm sticky top-0 z-50">
         <div class="max-w-4xl mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-2">
-                <i class="fa-solid fa-person-running text-3xl text-blue-600"></i>
-                <h1 class="text-2xl font-bold tracking-tight">JumpPro <span class="text-blue-600">Analytics</span></h1>
-            </div>
-            <a href="#analise" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-full font-medium transition-colors text-sm">Nova Análise</a>
+            <h1 class="text-2xl font-bold tracking-tight">JumpPro <span class="text-blue-600">Analytics</span></h1>
+            <a href="#analise" class="bg-blue-600 text-white px-5 py-2 rounded-full font-medium text-sm">Nova Análise</a>
         </div>
     </header>
 
-    <!-- Hero Section -->
     <main class="flex-grow">
         <section class="max-w-4xl mx-auto px-4 py-12 text-center">
-            <h2 class="text-4xl md:text-5xl font-extrabold mb-4 leading-tight">Descubra a Ciência por trás do seu <span class="gradient-text">Salto Vertical</span></h2>
-            <p class="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">Use nossa Inteligência Artificial para analisar sua biomecânica, medir sua altura real e receber um plano de treino personalizado.</p>
+            <h2 class="text-4xl font-extrabold mb-4">Descubra a Ciência do seu Salto</h2>
             
-            <!-- Formulário Principal -->
-            <div id="analise" class="glass-card rounded-2xl shadow-xl p-6 md:p-10 text-left bg-white relative overflow-hidden">
+            <div id="analise" class="bg-white rounded-2xl shadow-xl p-6 md:p-10 text-left relative overflow-hidden">
                 
-                <!-- Loading Overlay -->
-                <div id="loadingOverlay" class="absolute inset-0 bg-white/90 z-50 hidden flex-col items-center justify-center text-center">
-                    <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12 mb-4"></div>
-                    <h3 class="text-xl font-bold text-gray-800">Processando seu Salto...</h3>
-                    <p class="text-gray-500 text-sm mt-2">A IA está analisando cada frame. Isso leva cerca de 30-60s.</p>
+                <div id="loadingOverlay" class="absolute inset-0 bg-white/90 z-50 hidden flex-col items-center justify-center">
+                    <div class="animate-spin rounded-full border-4 border-blue-600 border-t-transparent h-12 w-12 mb-4"></div>
+                    <h3 class="text-xl font-bold">Analisando Biomecânica...</h3>
+                    <p class="text-sm text-gray-500">Isso pode levar até 1 minuto.</p>
                 </div>
 
                 <form id="jumpForm" class="space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Nome Completo</label>
-                            <input type="text" id="nome" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" placeholder="Seu nome">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">WhatsApp</label>
-                            <input type="tel" id="telefone" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" placeholder="(11) 99999-9999">
-                        </div>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <input type="text" id="nome" required class="w-full px-4 py-3 border rounded-lg" placeholder="Nome">
+                        <input type="tel" id="telefone" required class="w-full px-4 py-3 border rounded-lg" placeholder="WhatsApp">
+                        <input type="email" id="email" required class="w-full px-4 py-3 border rounded-lg" placeholder="Email">
+                        <input type="number" id="altura_user" step="0.01" required class="w-full px-4 py-3 border rounded-lg" placeholder="Sua Altura (m)">
                     </div>
-
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
-                            <input type="email" id="email" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" placeholder="seu@email.com">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Sua Altura (m)</label>
-                            <input type="number" id="altura_user" step="0.01" min="1.00" max="2.50" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" placeholder="Ex: 1.75">
-                        </div>
+                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                        <input id="video" type="file" accept="video/mp4,video/mov" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"/>
                     </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Vídeo do Salto (Max 200MB)</label>
-                        <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:bg-gray-50 transition cursor-pointer" onclick="document.getElementById('video').click()">
-                            <div class="space-y-1 text-center">
-                                <i class="fa-solid fa-cloud-arrow-up text-4xl text-gray-400 mb-3"></i>
-                                <div class="flex text-sm text-gray-600">
-                                    <label for="video" class="relative cursor-pointer rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none">
-                                        <span>Faça upload de um arquivo</span>
-                                        <input id="video" name="video" type="file" class="sr-only" accept="video/mp4,video/mov,video/quicktime">
-                                    </label>
-                                    <p class="pl-1">ou arraste e solte</p>
-                                </div>
-                                <p class="text-xs text-gray-500">MP4 ou MOV até 200MB</p>
-                                <p id="fileName" class="text-sm font-semibold text-blue-600 mt-2"></p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <button type="submit" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-blue-700 transform hover:scale-[1.01] transition-all flex items-center justify-center gap-2">
-                        <span>🚀 ANALISAR AGORA</span>
-                    </button>
+                    <button type="submit" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition">ANALISAR AGORA</button>
                 </form>
             </div>
 
-            <!-- Resultados Section (Hidden by Default) -->
-            <div id="resultsSection" class="hidden mt-12 text-left animate-fade-in-up">
+            <!-- RESULTADOS -->
+            <div id="resultsSection" class="hidden mt-12 text-left">
                 <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
-                    <div class="bg-gray-900 text-white p-6 flex justify-between items-center">
-                        <h3 class="text-xl font-bold">Relatório de Performance</h3>
-                        <span class="bg-green-500 text-xs font-bold px-2 py-1 rounded text-white">CONCLUÍDO</span>
+                    <div class="bg-gray-900 text-white p-6">
+                        <h3 class="text-xl font-bold">Análise Concluída</h3>
                     </div>
                     
-                    <div class="p-6 md:p-8">
-                        <!-- Métricas Grid -->
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                            <div class="bg-blue-50 p-4 rounded-xl text-center">
-                                <p class="text-xs text-gray-500 uppercase font-bold tracking-wider">Altura</p>
-                                <p id="resAltura" class="text-3xl font-bold text-blue-600">-- cm</p>
-                            </div>
-                            <div class="bg-purple-50 p-4 rounded-xl text-center">
-                                <p class="text-xs text-gray-500 uppercase font-bold tracking-wider">Dip (Ângulo)</p>
-                                <p id="resDip" class="text-3xl font-bold text-purple-600">--°</p>
-                            </div>
-                            <div class="bg-green-50 p-4 rounded-xl text-center">
-                                <p class="text-xs text-gray-500 uppercase font-bold tracking-wider">Explosão</p>
-                                <p id="resExtensao" class="text-3xl font-bold text-green-600">--°</p>
-                            </div>
-                            <div class="bg-yellow-50 p-4 rounded-xl text-center">
-                                <p class="text-xs text-gray-500 uppercase font-bold tracking-wider">Ritmo</p>
-                                <p id="resTempo" class="text-3xl font-bold text-yellow-600">-- s</p>
-                            </div>
+                    <div class="p-6">
+                        <!-- PLAYER DE VÍDEO PROCESSADO -->
+                        <div class="mb-8 bg-black rounded-xl overflow-hidden aspect-video flex items-center justify-center">
+                            <video id="videoResult" controls class="w-full h-full object-contain"></video>
                         </div>
 
-                        <div class="border-t border-gray-200 my-6"></div>
-
-                        <!-- Plano IA -->
-                        <div class="prose max-w-none text-gray-700">
-                            <h4 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                <i class="fa-solid fa-brain text-purple-600"></i> Análise do Treinador IA
-                            </h4>
-                            <div id="resPlano" class="bg-gray-50 p-6 rounded-xl border border-gray-100 text-sm leading-relaxed whitespace-pre-line">
-                                <!-- Texto do Gemini vai aqui -->
-                            </div>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 text-center">
+                            <div class="bg-blue-50 p-4 rounded-xl"><p class="text-xs font-bold text-gray-500">ALTURA</p><p id="resAltura" class="text-2xl font-bold text-blue-600">--</p></div>
+                            <div class="bg-purple-50 p-4 rounded-xl"><p class="text-xs font-bold text-gray-500">DIP</p><p id="resDip" class="text-2xl font-bold text-purple-600">--</p></div>
+                            <div class="bg-green-50 p-4 rounded-xl"><p class="text-xs font-bold text-gray-500">EXPLOSÃO</p><p id="resExtensao" class="text-2xl font-bold text-green-600">--</p></div>
+                            <div class="bg-yellow-50 p-4 rounded-xl"><p class="text-xs font-bold text-gray-500">RITMO</p><p id="resTempo" class="text-2xl font-bold text-yellow-600">--</p></div>
                         </div>
 
-                        <!-- Call to Action Pagamento -->
-                        <div class="mt-8 bg-gradient-to-r from-blue-600 to-indigo-700 rounded-xl p-6 text-white text-center shadow-lg">
-                            <h3 class="text-xl font-bold mb-2">Quer o Plano Completo de 30 Dias?</h3>
-                            <p class="text-blue-100 mb-6 text-sm">Receba a planilha detalhada com séries, repetições e vídeos dos exercícios corretivos para o seu caso.</p>
-                            <a href="https://checkout.infinitepay.io/digmkt?items=[{%22name%22:%22JumpAI%22,%22price%22:1990,%22quantity%22:1}]&redirect_url=https://volai.netlify.app/" target="_blank" class="inline-block bg-white text-blue-700 font-bold py-3 px-8 rounded-full hover:bg-gray-100 transition shadow-md">
-                                👉 Desbloquear Treino (R$ 19,90)
+                        <div id="resPlano" class="bg-gray-50 p-6 rounded-xl text-sm whitespace-pre-line mb-8"></div>
+
+                        <div class="text-center">
+                            <a id="buyButton" href="#" target="_blank" class="inline-block bg-green-600 text-white font-bold py-4 px-10 rounded-full hover:bg-green-700 shadow-lg transform hover:scale-105 transition">
+                                👉 Desbloquear Treino Completo (R$ 17,00)
                             </a>
                         </div>
                     </div>
                 </div>
             </div>
-
         </section>
     </main>
 
-    <footer class="bg-white border-t border-gray-200 mt-12 py-8">
-        <div class="max-w-4xl mx-auto px-4 text-center text-gray-400 text-sm">
-            <p>&copy; 2025 JumpPro Analytics. Todos os direitos reservados.</p>
-        </div>
-    </footer>
-
     <script>
-        // --- CONFIGURAÇÃO ---
         const API_URL = "https://motor-ia-832830832022.us-central1.run.app/analisar_salto/";
-
-        // UI Logic
-        const fileInput = document.getElementById('video');
-        const fileNameDisplay = document.getElementById('fileName');
-        
-        fileInput.addEventListener('change', function(e) {
-            if(this.files && this.files.length > 0) {
-                fileNameDisplay.textContent = this.files[0].name;
-            }
-        });
 
         document.getElementById('jumpForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            
-            // Validação simples
             const videoFile = document.getElementById('video').files[0];
-            if (!videoFile) { alert("Por favor, selecione um vídeo!"); return; }
+            if (!videoFile) return alert("Selecione um vídeo!");
 
-            // Mostrar Loading
-            const loadingOverlay = document.getElementById('loadingOverlay');
-            loadingOverlay.classList.remove('hidden');
-            loadingOverlay.classList.add('flex');
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+            document.getElementById('loadingOverlay').classList.add('flex');
 
-            // Preparar Dados
             const formData = new FormData();
             formData.append('video', videoFile);
             formData.append('nome', document.getElementById('nome').value);
@@ -188,42 +94,35 @@
             formData.append('altura_user', document.getElementById('altura_user').value);
 
             try {
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (!response.ok) {
-                    throw new Error('Erro na análise. Tente um vídeo menor ou mais curto.');
-                }
-
+                const response = await fetch(API_URL, { method: 'POST', body: formData });
+                if (!response.ok) throw new Error('Erro na análise. Tente um vídeo menor.');
                 const data = await response.json();
                 
-                // Preencher Resultados
                 if (data.status === "ok") {
                     document.getElementById('resAltura').textContent = data.metricas.altura.toFixed(1) + " cm";
                     document.getElementById('resDip').textContent = Math.round(data.metricas.dip) + "°";
                     document.getElementById('resExtensao').textContent = Math.round(data.metricas.extensao) + "°";
                     document.getElementById('resTempo').textContent = data.metricas.tempo.toFixed(2) + " s";
                     
-                    // Formatar Texto do Gemini (remover asteriscos markdown simples)
-                    let planoTexto = data.plano.replace(/\*\*/g, ''); 
-                    document.getElementById('resPlano').innerText = planoTexto;
+                    document.getElementById('resPlano').innerText = data.plano.replace(/\*\*/g, '');
+                    
+                    if (data.link_pagamento) document.getElementById('buyButton').href = data.link_pagamento;
 
-                    // Mostrar Seção
+                    // --- EXIBIR VÍDEO ---
+                    if (data.video_base64) {
+                        const videoBlob = await (await fetch(`data:video/mp4;base64,${data.video_base64}`)).blob();
+                        const videoUrl = URL.createObjectURL(videoBlob);
+                        document.getElementById('videoResult').src = videoUrl;
+                    }
+
                     document.getElementById('resultsSection').classList.remove('hidden');
-                    // Scroll suave até o resultado
                     document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
-                } else {
-                    alert("Ocorreu um erro inesperado na resposta da IA.");
                 }
-
             } catch (error) {
-                console.error(error);
-                alert("Erro ao conectar com o servidor: " + error.message);
+                alert("Erro: " + error.message);
             } finally {
-                loadingOverlay.classList.add('hidden');
-                loadingOverlay.classList.remove('flex');
+                document.getElementById('loadingOverlay').classList.add('hidden');
+                document.getElementById('loadingOverlay').classList.remove('flex');
             }
         });
     </script>
