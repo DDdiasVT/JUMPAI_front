@@ -1,130 +1,253 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JumpPro Analytics</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-</head>
-<body class="bg-gray-50 text-gray-800 antialiased min-h-screen flex flex-col">
+from fastapi import FastAPI, UploadFile, File, HTTPException, Form
+from fastapi.middleware.cors import CORSMiddleware
+from tempfile import NamedTemporaryFile
+from functools import lru_cache 
+import os
+import cv2
+import mediapipe as mp
+import numpy as np
+import requests
+from google import genai
+import gc
+import base64
+import subprocess # Para rodar o FFmpeg
 
-    <header class="w-full py-6 px-4 bg-white shadow-sm sticky top-0 z-50">
-        <div class="max-w-4xl mx-auto flex justify-between items-center">
-            <h1 class="text-2xl font-bold tracking-tight">JumpPro <span class="text-blue-600">Analytics</span></h1>
-            <a href="#analise" class="bg-blue-600 text-white px-5 py-2 rounded-full font-medium text-sm">Nova Análise</a>
-        </div>
-    </header>
+# --- CONFIGURAÇÕES ---
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY") 
+GOOGLE_FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLScqve9FcZhMQkakXLGfnEiJzyKWAN8cLqaMCiLvRHez9NQYmg/formResponse"
+LINK_INFINITEPAY = "https://link.infinitepay.io/digmkt/VC1DLTItSQ-2GSZhOK9Ep-17,00"
 
-    <main class="flex-grow">
-        <section class="max-w-4xl mx-auto px-4 py-12 text-center">
-            <h2 class="text-4xl font-extrabold mb-4">Descubra a Ciência do seu Salto</h2>
-            
-            <div id="analise" class="bg-white rounded-2xl shadow-xl p-6 md:p-10 text-left relative overflow-hidden">
-                
-                <div id="loadingOverlay" class="absolute inset-0 bg-white/90 z-50 hidden flex-col items-center justify-center">
-                    <div class="animate-spin rounded-full border-4 border-blue-600 border-t-transparent h-12 w-12 mb-4"></div>
-                    <h3 class="text-xl font-bold">Analisando Biomecânica...</h3>
-                    <p class="text-sm text-gray-500">Isso pode levar até 1 minuto.</p>
-                </div>
+app = FastAPI()
 
-                <form id="jumpForm" class="space-y-6">
-                    <div class="grid md:grid-cols-2 gap-6">
-                        <input type="text" id="nome" required class="w-full px-4 py-3 border rounded-lg" placeholder="Nome">
-                        <input type="tel" id="telefone" required class="w-full px-4 py-3 border rounded-lg" placeholder="WhatsApp">
-                        <input type="email" id="email" required class="w-full px-4 py-3 border rounded-lg" placeholder="Email">
-                        <input type="number" id="altura_user" step="0.01" required class="w-full px-4 py-3 border rounded-lg" placeholder="Sua Altura (m)">
-                    </div>
-                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                        <input id="video" type="file" accept="video/mp4,video/mov" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"/>
-                    </div>
-                    <button type="submit" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition">ANALISAR AGORA</button>
-                </form>
-            </div>
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-            <!-- RESULTADOS -->
-            <div id="resultsSection" class="hidden mt-12 text-left">
-                <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
-                    <div class="bg-gray-900 text-white p-6">
-                        <h3 class="text-xl font-bold">Análise Concluída</h3>
-                    </div>
-                    
-                    <div class="p-6">
-                        <!-- PLAYER DE VÍDEO PROCESSADO -->
-                        <div class="mb-8 bg-black rounded-xl overflow-hidden aspect-video flex items-center justify-center">
-                            <video id="videoResult" controls class="w-full h-full object-contain"></video>
-                        </div>
+mp_pose = mp.solutions.pose
+mp_drawing = mp.solutions.drawing_utils
 
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 text-center">
-                            <div class="bg-blue-50 p-4 rounded-xl"><p class="text-xs font-bold text-gray-500">ALTURA</p><p id="resAltura" class="text-2xl font-bold text-blue-600">--</p></div>
-                            <div class="bg-purple-50 p-4 rounded-xl"><p class="text-xs font-bold text-gray-500">DIP</p><p id="resDip" class="text-2xl font-bold text-purple-600">--</p></div>
-                            <div class="bg-green-50 p-4 rounded-xl"><p class="text-xs font-bold text-gray-500">EXPLOSÃO</p><p id="resExtensao" class="text-2xl font-bold text-green-600">--</p></div>
-                            <div class="bg-yellow-50 p-4 rounded-xl"><p class="text-xs font-bold text-gray-500">RITMO</p><p id="resTempo" class="text-2xl font-bold text-yellow-600">--</p></div>
-                        </div>
+@lru_cache(maxsize=1)
+def get_pose_model():
+    return mp_pose.Pose(min_detection_confidence=0.7, min_tracking_confidence=0.7, model_complexity=1)
 
-                        <div id="resPlano" class="bg-gray-50 p-6 rounded-xl text-sm whitespace-pre-line mb-8"></div>
+def calcular_angulo(a, b, c):
+    a = np.array(a); b = np.array(b); c = np.array(c)
+    radians = np.arctan2(c[1]-b[1], c[0]-b[0]) - np.arctan2(a[1]-b[1], a[0]-b[0])
+    angle = np.abs(radians*180.0/np.pi)
+    if angle > 180.0: angle = 360-angle
+    return angle
 
-                        <div class="text-center">
-                            <a id="buyButton" href="#" target="_blank" class="inline-block bg-green-600 text-white font-bold py-4 px-10 rounded-full hover:bg-green-700 shadow-lg transform hover:scale-105 transition">
-                                👉 Desbloquear Treino Completo (R$ 17,00)
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
+def salvar_lead(dados_contato, dados_metricas, plano_texto):
+    dados = {
+        "entry.1427267338": dados_contato['nome'],
+        "entry.597277093": dados_contato['email'],
+        "entry.1793364676": dados_contato['telefone'],
+        "entry.215882622": str(dados_contato['altura_user']),
+        "entry.1994800528": f"{dados_metricas['altura']:.1f}",
+        "entry.1509204305": f"{dados_metricas['dip']:.0f}",
+        "entry.1858263009": f"{dados_metricas['extensao']:.0f}",
+        "entry.635471438": f"{dados_metricas['tempo']:.2f}",
+        "entry.1582150062": plano_texto
+    }
+    try:
+        requests.post(GOOGLE_FORM_URL, data=dados)
+        return True
+    except:
+        return False
 
-    <script>
-        const API_URL = "https://motor-ia-832830832022.us-central1.run.app/analisar_salto/";
+def gerar_plano_gemini(dados_contato, dados_metricas):
+    if not GEMINI_API_KEY: return "Erro: Chave API não configurada."
+    try:
+        client = genai.Client(api_key=GEMINI_API_KEY)
+        dados_str = f"Atleta: {dados_contato['nome']}, Salto: {dados_metricas['altura']:.1f}cm, Dip: {dados_metricas['dip']:.0f}, Ritmo: {dados_metricas['tempo']:.2f}s"
+        prompt = f"""
+        ATUAÇÃO: Você é um treinador olímpico de força e condicionamento, especialista em biomecânica de salto vertical.
+        
+        DADOS DO ATLETA ANALISADO:
+        {dados_str}
+        
+        TAREFA:
+        Analise os dados biomecânicos acima e crie um relatório de alta performance.
+        
+        ESTRUTURA OBRIGATÓRIA DA RESPOSTA:
+        
+        1. 🩺 DIAGNÓSTICO TÉCNICO (Seja direto):
+           - Analise o DIP: Está muito profundo (>100) ou curto (<80)? Explique o impacto disso.
+           - Analise o RITMO: Está lento (>0.8s)? Isso indica falta de força reativa?
+           - Dê um feedback sobre a extensão.
+           
+        2. 🎯 A META DE 30 DIAS:
+           - Projete um ganho realista em cm se ele seguir o treino (ex: +3 a 5cm).
+           
+        3. 📅 O PLANO DE AÇÃO DE 4 SEMANAS (Obrigatório):
+           Crie uma rotina prática dividida por semanas.
+           - Semana 1: Foco (ex: Técnica de Aterrissagem e Força Base). Liste 3 exercícios.
+           - Semana 2: Foco (ex: Potência e Pliometria Baixa). Liste 3 exercícios.
+           - Semana 3: Foco (ex: Reatividade e Choque). Liste 3 exercícios.
+           - Semana 4: Foco (ex: Deload e Teste Máximo).
+           
+        IMPORTANTE: Não use asteriscos (**) para negrito, use CAIXA ALTA para destaques. Seja motivador e use emojis.
+        """
+        
+        response = client.models.generate_content(model="gemini-2.5-flash", contents=prompt)
+        return response.text
+    except Exception as e:
+        return f"Erro Gemini: {str(e)}"
 
-        document.getElementById('jumpForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const videoFile = document.getElementById('video').files[0];
-            if (!videoFile) return alert("Selecione um vídeo!");
+# --- CONVERSÃO DE VÍDEO (FIX PARA NAVEGADORES) ---
+def converter_para_h264(input_path, output_path):
+    """Usa FFmpeg para converter o vídeo para H.264 (compatível com navegadores)"""
+    try:
+        # Comando FFmpeg para converter para MP4 H.264 leve
+        command = [
+            'ffmpeg', '-y', # Sobrescrever
+            '-i', input_path,
+            '-vcodec', 'libx264',
+            '-f', 'mp4',
+            '-preset', 'fast', # Rápido
+            '-crf', '28', # Compressão maior para arquivo leve
+            output_path
+        ]
+        subprocess.run(command, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        return True
+    except Exception as e:
+        print(f"Erro FFmpeg: {e}")
+        return False
 
-            document.getElementById('loadingOverlay').classList.remove('hidden');
-            document.getElementById('loadingOverlay').classList.add('flex');
+# --- PROCESSAMENTO COM VÍDEO ---
+def processar_video(video_path):
+    pose = get_pose_model()
+    cap = cv2.VideoCapture(video_path)
+    
+    largura = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    altura = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    if fps == 0 or np.isnan(fps): fps = 30.0
+    
+    # Reduzir resolução para 480p (mais rápido e leve)
+    fator = 480 / largura if largura > 480 else 1.0
+    largura_nova = int(largura * fator)
+    altura_nova = int(altura * fator)
 
-            const formData = new FormData();
-            formData.append('video', videoFile);
-            formData.append('nome', document.getElementById('nome').value);
-            formData.append('email', document.getElementById('email').value);
-            formData.append('telefone', document.getElementById('telefone').value);
-            formData.append('altura_user', document.getElementById('altura_user').value);
+    # Arquivo temporário RAW (antes da conversão)
+    tfile_raw = NamedTemporaryFile(delete=False, suffix='.avi')
+    raw_path = tfile_raw.name
+    
+    # Usamos MJPG para garantir escrita rápida no Linux
+    fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+    out = cv2.VideoWriter(raw_path, fourcc, fps, (largura_nova, altura_nova))
 
-            try {
-                const response = await fetch(API_URL, { method: 'POST', body: formData });
-                if (!response.ok) throw new Error('Erro na análise. Tente um vídeo menor.');
-                const data = await response.json();
-                
-                if (data.status === "ok") {
-                    document.getElementById('resAltura').textContent = data.metricas.altura.toFixed(1) + " cm";
-                    document.getElementById('resDip').textContent = Math.round(data.metricas.dip) + "°";
-                    document.getElementById('resExtensao').textContent = Math.round(data.metricas.extensao) + "°";
-                    document.getElementById('resTempo').textContent = data.metricas.tempo.toFixed(2) + " s";
-                    
-                    document.getElementById('resPlano').innerText = data.plano.replace(/\*\*/g, '');
-                    
-                    if (data.link_pagamento) document.getElementById('buyButton').href = data.link_pagamento;
+    chao_y = 0; min_dip = 180; max_ext = 0; frames_ar = 0; estado = "CHAO"
+    frame_idx = 0; frame_takeoff = 0; frame_dip = 0; altura_cm = 0.0
+    
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret: break
+        
+        if fator != 1.0: frame = cv2.resize(frame, (largura_nova, altura_nova))
+        
+        image_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        res = pose.process(image_rgb)
 
-                    // --- EXIBIR VÍDEO ---
-                    if (data.video_base64) {
-                        const videoBlob = await (await fetch(`data:video/mp4;base64,${data.video_base64}`)).blob();
-                        const videoUrl = URL.createObjectURL(videoBlob);
-                        document.getElementById('videoResult').src = videoUrl;
-                    }
+        if res.pose_landmarks:
+            mp_drawing.draw_landmarks(
+                frame, 
+                res.pose_landmarks, 
+                mp_pose.POSE_CONNECTIONS,
+                mp_drawing.DrawingSpec(color=(245,117,66), thickness=2, circle_radius=2),
+                mp_drawing.DrawingSpec(color=(245,66,230), thickness=2, circle_radius=2)
+            )
 
-                    document.getElementById('resultsSection').classList.remove('hidden');
-                    document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
-                }
-            } catch (error) {
-                alert("Erro: " + error.message);
-            } finally {
-                document.getElementById('loadingOverlay').classList.add('hidden');
-                document.getElementById('loadingOverlay').classList.remove('flex');
-            }
-        });
-    </script>
-</body>
-</html>
+            lms = res.pose_landmarks.landmark
+            h = [lms[23].x, lms[23].y]; k = [lms[25].x, lms[25].y]; a = [lms[27].x, lms[27].y]
+            pe_y = max(lms[31].y, lms[32].y) * altura_nova
+            ang_joelho = calcular_angulo(h, k, a)
+
+            if estado == "CHAO":
+                if frame_idx < 15: pass 
+                elif chao_y == 0: chao_y = pe_y 
+                if chao_y > 0:
+                    if ang_joelho < min_dip: min_dip = ang_joelho
+                    if ang_joelho < 170 and frame_dip == 0: frame_dip = frame_idx
+                    if pe_y < (chao_y - altura_nova * 0.03): 
+                        estado = "AR"; frame_takeoff = frame_idx
+            elif estado == "AR":
+                frames_ar += 1
+                if ang_joelho > max_ext: max_ext = ang_joelho
+                if pe_y >= (chao_y - altura_nova * 0.01):
+                    estado = "POUSO"
+                    tempo_voo = frames_ar / fps 
+                    altura_cm = 122.6 * (tempo_voo ** 2)
+
+        out.write(frame)
+        frame_idx += 1
+        if frame_idx % 50 == 0: gc.collect()
+
+    cap.release()
+    out.release()
+    
+    tempo_dip = (frame_takeoff - frame_dip) / fps if frame_dip > 0 else 0
+    
+    return {
+        "metricas": {"altura": altura_cm, "dip": min_dip, "extensao": max_ext, "tempo": tempo_dip},
+        "raw_path": raw_path
+    }
+
+@app.get("/")
+def home(): return {"status": "IA Online"}
+
+@app.post("/analisar_salto/")
+async def analisar(
+    video: UploadFile = File(...),
+    nome: str = Form(...),
+    email: str = Form(...),
+    telefone: str = Form(...),
+    altura_user: float = Form(...)
+):
+    tmp_path = None
+    raw_path = None
+    final_mp4_path = None
+    
+    try:
+        with NamedTemporaryFile(delete=False, suffix='.mp4') as tmp:
+            tmp.write(await video.read())
+            tmp_path = tmp.name
+        
+        # 1. Processa e gera vídeo RAW
+        resultado = processar_video(tmp_path)
+        metricas = resultado["metricas"]
+        raw_path = resultado["raw_path"]
+        
+        # 2. Converte RAW para H.264 (Navegador)
+        final_mp4_path = raw_path.replace('.avi', '_final.mp4')
+        conversao_ok = converter_para_h264(raw_path, final_mp4_path)
+        
+        if conversao_ok:
+            with open(final_mp4_path, "rb") as video_file:
+                video_base64 = base64.b64encode(video_file.read()).decode('utf-8')
+        else:
+            video_base64 = None # Se falhar, retorna sem vídeo mas com dados
+
+        contato = {'nome': nome, 'email': email, 'telefone': telefone, 'altura_user': altura_user}
+        plano = gerar_plano_gemini(contato, metricas)
+        salvar_lead(contato, metricas, plano)
+
+        return {
+            "status": "ok", 
+            "metricas": metricas, 
+            "plano": plano,
+            "link_pagamento": LINK_INFINITEPAY,
+            "video_base64": video_base64
+        }
+
+    except Exception as e:
+        print(f"Erro: {e}") 
+        raise HTTPException(500, detail=str(e))
+    finally:
+        # Limpeza
+        for p in [tmp_path, raw_path, final_mp4_path]:
+            if p and os.path.exists(p): os.unlink(p)
