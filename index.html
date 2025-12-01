@@ -271,19 +271,25 @@
                 document.getElementById('resExtensao').textContent = Math.round(data.metricas.extensao) + "°";
                 document.getElementById('resTempo').textContent = data.metricas.tempo.toFixed(2) + " s";
                 
-                // Lógica do Paywall
-                let textoCompleto = data.plano; // O texto já é HTML
-                let splitMarker = "3. 📅";
-                if (!textoCompleto.includes(splitMarker)) splitMarker = "3.";
+                // Lógica do Paywall: Procura a string '<h3>3.' para garantir o corte no início da seção 3.
+                let textoCompleto = data.plano; 
+                const splitMarker = "<h3>3."; // Marcador HTML mais seguro
+                let textoExibido;
 
-                let partes = textoCompleto.split(splitMarker);
-                let textoExibido = partes[0]; 
+                const splitIndex = textoCompleto.indexOf(splitMarker); 
+
+                if (splitIndex !== -1) {
+                    // Se encontrou o marcador, corta o texto ANTES da tag <h3>3.
+                    textoExibido = textoCompleto.substring(0, splitIndex); 
+                } else {
+                    // Fallback: Se o formato mudou (a IA não usou '<h3>3.'), mostra o relatório inteiro.
+                    textoExibido = textoCompleto;
+                }
 
                 // Adiciona o paywall em HTML
                 textoExibido += "<hr style='margin-top:20px; border:0; border-top: 2px dashed #ccc;'><p style='font-weight:bold; color:#cc0000;'>🔒 O PLANO DE AÇÃO DE 4 SEMANAS ESTÁ BLOQUEADO.</p>";
                 textoExibido += "<p>Realize o pagamento abaixo para liberar o treino completo e a planilha.</p>";
 
-                // A MUDANÇA: Usamos .innerHTML para renderizar o HTML corretamente
                 document.getElementById('resPlano').innerHTML = textoExibido;
                 
                 // Exibir Vídeo
