@@ -200,116 +200,113 @@
     </div>
 
     <script>
-        // --- CONFIGURAÇÃO ---
-        const API_URL = "https://motor-ia-832830832022.us-central1.run.app/analisar_salto/";
+    // --- CONFIGURAÇÃO ---
+    const API_URL = "https://motor-ia-832830832022.us-central1.run.app/analisar_salto/";
 
-        // Lógica do Modal
-        const uploadTrigger = document.getElementById('uploadTrigger');
-        const modal = document.getElementById('instructionModal');
-        const confirmBtn = document.getElementById('confirmUploadBtn');
-        const realInput = document.getElementById('video');
-        const fileNameDisplay = document.getElementById('fileName');
+    // Lógica do Modal
+    const uploadTrigger = document.getElementById('uploadTrigger');
+    const modal = document.getElementById('instructionModal');
+    const confirmBtn = document.getElementById('confirmUploadBtn');
+    const realInput = document.getElementById('video');
+    const fileNameDisplay = document.getElementById('fileName');
 
-        function toggleModal() {
-            modal.classList.toggle('opacity-0');
-            modal.classList.toggle('pointer-events-none');
-            document.body.classList.toggle('modal-active');
+    function toggleModal() {
+        modal.classList.toggle('opacity-0');
+        modal.classList.toggle('pointer-events-none');
+        document.body.classList.toggle('modal-active');
+    }
+
+    uploadTrigger.addEventListener('click', toggleModal);
+
+    confirmBtn.addEventListener('click', function() {
+        toggleModal();
+        realInput.click(); // Abre o seletor de arquivos real
+    });
+
+    // Quando o usuário seleciona o arquivo
+    realInput.addEventListener('change', function(e) {
+        if(this.files && this.files.length > 0) {
+            fileNameDisplay.textContent = "✅ " + this.files[0].name;
+            fileNameDisplay.classList.add("text-green-600");
         }
+    });
 
-        uploadTrigger.addEventListener('click', toggleModal);
+    // Lógica de Envio
+    document.getElementById('jumpForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        // Validação simples
+        const videoFile = realInput.files[0];
+        if (!videoFile) { alert("Por favor, selecione um vídeo!"); return; }
 
-        confirmBtn.addEventListener('click', function() {
-            toggleModal();
-            realInput.click(); // Abre o seletor de arquivos real
-        });
+        // Mostrar Loading
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        loadingOverlay.classList.remove('hidden');
+        loadingOverlay.classList.add('flex');
 
-        // Quando o usuário seleciona o arquivo
-        realInput.addEventListener('change', function(e) {
-            if(this.files && this.files.length > 0) {
-                fileNameDisplay.textContent = "✅ " + this.files[0].name;
-                fileNameDisplay.classList.add("text-green-600");
+        // Preparar Dados
+        const formData = new FormData();
+        formData.append('video', videoFile);
+        formData.append('nome', document.getElementById('nome').value);
+        formData.append('email', document.getElementById('email').value);
+        formData.append('telefone', document.getElementById('telefone').value);
+        formData.append('altura_user', document.getElementById('altura_user').value);
+
+        try {
+            const response = await fetch(API_URL, {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                throw new Error('Erro na análise. Verifique se o vídeo segue as regras.');
             }
-        });
 
-        // Lógica de Envio
-        document.getElementById('jumpForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
+            const data = await response.json();
             
-            // Validação simples
-            const videoFile = realInput.files[0];
-            if (!videoFile) { alert("Por favor, selecione um vídeo!"); return; }
-
-            // Mostrar Loading
-            const loadingOverlay = document.getElementById('loadingOverlay');
-            loadingOverlay.classList.remove('hidden');
-            loadingOverlay.classList.add('flex');
-
-            // Preparar Dados
-            const formData = new FormData();
-            formData.append('video', videoFile);
-            formData.append('nome', document.getElementById('nome').value);
-            formData.append('email', document.getElementById('email').value);
-            formData.append('telefone', document.getElementById('telefone').value);
-            formData.append('altura_user', document.getElementById('altura_user').value);
-
-            try {
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (!response.ok) {
-                    throw new Error('Erro na análise. Verifique se o vídeo segue as regras.');
-                }
-
-                const data = await response.json();
+            // Preencher Resultados
+            if (data.status === "ok") {
+                document.getElementById('resAltura').textContent = data.metricas.altura.toFixed(1) + " cm";
+                document.getElementById('resDip').textContent = Math.round(data.metricas.dip) + "°";
+                document.getElementById('resExtensao').textContent = Math.round(data.metricas.extensao) + "°";
+                document.getElementById('resTempo').textContent = data.metricas.tempo.toFixed(2) + " s";
                 
-                // Preencher Resultados
-                if (data.status === "ok") {
-                    document.getElementById('resAltura').textContent = data.metricas.altura.toFixed(1) + " cm";
-                    document.getElementById('resDip').textContent = Math.round(data.metricas.dip) + "°";
-                    document.getElementById('resExtensao').textContent = Math.round(data.metricas.extensao) + "°";
-                    document.getElementById('resTempo').textContent = data.metricas.tempo.toFixed(2) + " s";
-                    
-                    // Lógica do Paywall
-                    let textoCompleto = data.plano.replace(/\*\*/g, ''); 
-                    let splitMarker = "3. 📅";
-                    if (!textoCompleto.includes(splitMarker)) splitMarker = "3.";
+                // Lógica do Paywall
+                let textoCompleto = data.plano; // O texto já é HTML
+                let splitMarker = "3. 📅";
+                if (!textoCompleto.includes(splitMarker)) splitMarker = "3.";
 
-                    let partes = textoCompleto.split(splitMarker);
-                    let textoExibido = partes[0]; 
+                let partes = textoCompleto.split(splitMarker);
+                let textoExibido = partes[0]; 
 
-                    textoExibido += "\n\n------------------------------------------------\n";
-                    textoExibido += "🔒 O PLANO DE AÇÃO DE 4 SEMANAS ESTÁ BLOQUEADO.\n";
-                    textoExibido += "Realize o pagamento abaixo para liberar o treino completo e a planilha.";
+                // Adiciona o paywall em HTML
+                textoExibido += "<hr style='margin-top:20px; border:0; border-top: 2px dashed #ccc;'><p style='font-weight:bold; color:#cc0000;'>🔒 O PLANO DE AÇÃO DE 4 SEMANAS ESTÁ BLOQUEADO.</p>";
+                textoExibido += "<p>Realize o pagamento abaixo para liberar o treino completo e a planilha.</p>";
 
-                    document.getElementById('resPlano').innerText = textoExibido;
-                    
-                    // IMPORTANTE: COMENTEI A LINHA ABAIXO PARA GARANTIR O LINK DA KIWIFY
-                    // Se o seu Python ainda enviar o link antigo, o código abaixo iria sobrescrever.
-                    // if (data.link_pagamento) document.getElementById('buyButton').href = data.link_pagamento;
-
-                    // Exibir Vídeo
-                    if (data.video_base64) {
-                        const videoBlob = await (await fetch(`data:video/mp4;base64,${data.video_base64}`)).blob();
-                        const videoUrl = URL.createObjectURL(videoBlob);
-                        document.getElementById('videoResult').src = videoUrl;
-                    }
-
-                    document.getElementById('resultsSection').classList.remove('hidden');
-                    document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
-                } else {
-                    alert("Ocorreu um erro inesperado na resposta da IA.");
+                // A MUDANÇA: Usamos .innerHTML para renderizar o HTML corretamente
+                document.getElementById('resPlano').innerHTML = textoExibido;
+                
+                // Exibir Vídeo
+                if (data.video_base64) {
+                    const videoBlob = await (await fetch(`data:video/mp4;base64,${data.video_base64}`)).blob();
+                    const videoUrl = URL.createObjectURL(videoBlob);
+                    document.getElementById('videoResult').src = videoUrl;
                 }
 
-            } catch (error) {
-                console.error(error);
-                alert("Erro ao conectar com o servidor: " + error.message);
-            } finally {
-                loadingOverlay.classList.add('hidden');
-                loadingOverlay.classList.remove('flex');
+                document.getElementById('resultsSection').classList.remove('hidden');
+                document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+            } else {
+                alert("Ocorreu um erro inesperado na resposta da IA.");
             }
-        });
-    </script>
+
+        } catch (error) {
+            console.error(error);
+            alert("Erro ao conectar com o servidor: " + error.message);
+        } finally {
+            loadingOverlay.classList.add('hidden');
+            loadingOverlay.classList.remove('flex');
+        }
+    });
+</script>
 </body>
 </html>
