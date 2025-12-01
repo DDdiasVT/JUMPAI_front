@@ -271,18 +271,18 @@
                 document.getElementById('resExtensao').textContent = Math.round(data.metricas.extensao) + "°";
                 document.getElementById('resTempo').textContent = data.metricas.tempo.toFixed(2) + " s";
                 
-                // Lógica do Paywall: Procura a string '<h3>3.' para garantir o corte no início da seção 3.
+                // Lógica do Paywall: Procura a string '<h3>📅' para garantir o corte no início da seção 3.
                 let textoCompleto = data.plano; 
-                const splitMarker = "<h3>3."; // Marcador HTML mais seguro
+                const splitMarker = "<h3>📅"; // NOVO MARCADOR ROBUSTO
                 let textoExibido;
 
                 const splitIndex = textoCompleto.indexOf(splitMarker); 
 
                 if (splitIndex !== -1) {
-                    // Se encontrou o marcador, corta o texto ANTES da tag <h3>3.
+                    // Se encontrou o marcador, corta o texto ANTES da tag <h3>📅
                     textoExibido = textoCompleto.substring(0, splitIndex); 
                 } else {
-                    // Fallback: Se o formato mudou (a IA não usou '<h3>3.'), mostra o relatório inteiro.
+                    // Fallback (se o formato do Gemini mudar): Mostra tudo.
                     textoExibido = textoCompleto;
                 }
 
