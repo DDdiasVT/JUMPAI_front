@@ -1,141 +1,171 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JumpPro Analytics - Análise de Salto com IA</title>
+    <title>STOUT.IO | Biomecânica de Elite</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@500;700&display=swap');
         body { font-family: 'Inter', sans-serif; }
-        .gradient-text { background: linear-gradient(to right, #3b82f6, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .glass-card { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); }
-        .loader { border-top-color: #3b82f6; -webkit-animation: spinner 1.5s linear infinite; animation: spinner 1.5s linear infinite; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        
+        /* Animação do Loader */
+        .loader { border-top-color: #a3e635; -webkit-animation: spinner 1s linear infinite; animation: spinner 1s linear infinite; }
         @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
         /* Modal Animation */
         .modal { transition: opacity 0.25s ease; }
         body.modal-active { overflow-x: hidden; overflow-y: visible !important; }
+        
+        /* Glass Effect Dark */
+        .glass-dark { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800 antialiased min-h-screen flex flex-col">
+<body class="bg-slate-950 text-slate-200 antialiased min-h-screen flex flex-col selection:bg-lime-400 selection:text-slate-900">
 
-    <header class="w-full py-6 px-4 bg-white shadow-sm sticky top-0 z-50">
-        <div class="max-w-4xl mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-2">
-                <i class="fa-solid fa-person-running text-3xl text-blue-600"></i>
-                <h1 class="text-2xl font-bold tracking-tight">JumpPro <span class="text-blue-600">Analytics</span></h1>
+    <header class="w-full py-5 px-6 bg-slate-950/80 backdrop-blur-md sticky top-0 z-50 border-b border-white/5">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 bg-lime-400 rounded flex items-center justify-center shadow-[0_0_15px_rgba(163,230,53,0.3)]">
+                    <span class="text-slate-950 font-black text-lg">S</span>
+                </div>
+                <h1 class="text-xl font-bold tracking-tight text-white">
+                    STOUT<span class="text-lime-400">.IO</span>
+                </h1>
             </div>
-            <a href="#analise" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-full font-medium transition-colors text-sm">Nova Análise</a>
+            <a href="#analise" class="hidden md:inline-block bg-white/5 hover:bg-white/10 text-white border border-white/10 px-5 py-2 rounded-lg font-medium transition-all text-xs uppercase tracking-wider backdrop-blur-sm">
+                Iniciar Scan
+            </a>
         </div>
     </header>
 
-    <main class="flex-grow">
-        <section class="max-w-4xl mx-auto px-4 py-12 text-center">
-            <h2 class="text-4xl md:text-5xl font-extrabold mb-4 leading-tight">Descubra a Ciência por trás do seu <span class="gradient-text">Salto Vertical</span></h2>
-            <p class="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">Use nossa Inteligência Artificial para analisar sua biomecânica, medir sua altura real e receber um plano de treino personalizado.</p>
+    <main class="flex-grow relative">
+        
+        <div class="absolute top-[-10%] left-1/2 -translate-x-1/2 w-[600px] h-[500px] bg-lime-500/10 rounded-full blur-[100px] pointer-events-none"></div>
+
+        <section class="max-w-4xl mx-auto px-4 py-16 md:py-24 text-center relative z-10">
             
-            <div id="analise" class="glass-card rounded-2xl shadow-xl p-6 md:p-10 text-left bg-white relative overflow-hidden">
+            <div class="inline-flex items-center gap-2 mb-8 px-3 py-1 rounded-full bg-slate-900 border border-slate-800 text-lime-400 text-[10px] font-bold tracking-widest uppercase">
+                <span class="w-2 h-2 rounded-full bg-lime-400 animate-pulse"></span>
+                System Online v2.0
+            </div>
+
+            <h2 class="text-5xl md:text-7xl font-black mb-6 leading-tight tracking-tight text-white">
+                Sua Impulsão <br>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-lime-400 to-emerald-400">Decodificada.</span>
+            </h2>
+            
+            <p class="text-lg text-slate-400 mb-12 max-w-xl mx-auto leading-relaxed">
+                Use a tecnologia <strong>STOUT Vision™</strong> para analisar sua biomecânica frame a frame. Receba métricas de elite e treinos corretivos da IA.
+            </p>
+            
+            <div id="analise" class="glass-dark rounded-2xl shadow-2xl p-6 md:p-10 text-left relative overflow-hidden">
                 
-                <div id="loadingOverlay" class="absolute inset-0 bg-white/90 z-50 hidden flex-col items-center justify-center text-center">
-                    <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12 mb-4"></div>
-                    <h3 class="text-xl font-bold text-gray-800">Processando seu Salto...</h3>
-                    <p class="text-gray-500 text-sm mt-2">A IA está analisando cada frame. Isso leva cerca de 30-60s.</p>
+                <div id="loadingOverlay" class="absolute inset-0 bg-slate-950/95 z-50 hidden flex-col items-center justify-center text-center backdrop-blur-sm">
+                    <div class="loader ease-linear rounded-full border-4 border-slate-800 border-t-lime-400 h-14 w-14 mb-6"></div>
+                    <h3 class="text-xl font-bold text-white tracking-tight">Processando Biomecânica...</h3>
+                    <p class="text-slate-500 text-sm mt-2 font-mono">Calculando vetores de força e gravidade.</p>
                 </div>
 
                 <form id="jumpForm" class="space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Nome Completo</label>
-                            <input type="text" id="nome" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" placeholder="Seu nome">
+                        <div class="space-y-1">
+                            <label class="text-xs font-bold text-slate-400 uppercase tracking-wide ml-1">Nome Completo</label>
+                            <input type="text" id="nome" required class="w-full px-4 py-3 rounded-lg bg-slate-900 border border-slate-700 text-white focus:ring-1 focus:ring-lime-400 focus:border-lime-400 outline-none transition placeholder-slate-600" placeholder="Ex: João Silva">
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">WhatsApp</label>
-                            <input type="tel" id="telefone" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" placeholder="(11) 99999-9999">
+                        <div class="space-y-1">
+                            <label class="text-xs font-bold text-slate-400 uppercase tracking-wide ml-1">WhatsApp</label>
+                            <input type="tel" id="telefone" required class="w-full px-4 py-3 rounded-lg bg-slate-900 border border-slate-700 text-white focus:ring-1 focus:ring-lime-400 focus:border-lime-400 outline-none transition placeholder-slate-600" placeholder="(11) 99999-9999">
                         </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
-                            <input type="email" id="email" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" placeholder="seu@email.com">
+                        <div class="space-y-1">
+                            <label class="text-xs font-bold text-slate-400 uppercase tracking-wide ml-1">E-mail</label>
+                            <input type="email" id="email" required class="w-full px-4 py-3 rounded-lg bg-slate-900 border border-slate-700 text-white focus:ring-1 focus:ring-lime-400 focus:border-lime-400 outline-none transition placeholder-slate-600" placeholder="seu@email.com">
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Sua Altura (m)</label>
-                            <input type="number" id="altura_user" step="0.01" min="1.00" max="2.50" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" placeholder="Ex: 1.75">
+                        <div class="space-y-1">
+                            <label class="text-xs font-bold text-slate-400 uppercase tracking-wide ml-1">Sua Altura (m)</label>
+                            <input type="number" id="altura_user" step="0.01" min="1.00" max="2.50" required class="w-full px-4 py-3 rounded-lg bg-slate-900 border border-slate-700 text-white focus:ring-1 focus:ring-lime-400 focus:border-lime-400 outline-none transition placeholder-slate-600" placeholder="Ex: 1.85">
                         </div>
                     </div>
 
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Vídeo do Salto (Max 200MB)</label>
-                        <div id="uploadTrigger" class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:bg-gray-50 transition cursor-pointer">
-                            <div class="space-y-1 text-center">
-                                <i class="fa-solid fa-cloud-arrow-up text-4xl text-gray-400 mb-3"></i>
-                                <div class="flex text-sm text-gray-600 justify-center">
-                                    <span class="relative rounded-md font-medium text-blue-600 hover:text-blue-500">
+                    <div class="space-y-2">
+                        <label class="text-xs font-bold text-slate-400 uppercase tracking-wide ml-1">Vídeo do Salto (Perfil)</label>
+                        <div id="uploadTrigger" class="group relative flex justify-center px-6 pt-8 pb-8 border-2 border-slate-700 border-dashed rounded-xl hover:bg-slate-800/50 hover:border-lime-500/50 transition cursor-pointer">
+                            <div class="space-y-2 text-center">
+                                <i class="fa-solid fa-cloud-arrow-up text-3xl text-slate-500 group-hover:text-lime-400 transition-colors mb-2"></i>
+                                <div class="flex text-sm text-slate-300 justify-center">
+                                    <span class="relative rounded-md font-medium text-lime-400 hover:text-lime-300">
                                         Clique para selecionar o vídeo
                                     </span>
                                 </div>
-                                <p class="text-xs text-gray-500">MP4 ou MOV até 200MB</p>
-                                <p id="fileName" class="text-sm font-semibold text-blue-600 mt-2"></p>
+                                <p class="text-xs text-slate-500">MP4 ou MOV até 200MB</p>
+                                <p id="fileName" class="text-sm font-semibold text-lime-400 mt-2 font-mono"></p>
                             </div>
                         </div>
                         <input id="video" name="video" type="file" class="hidden" accept="video/mp4,video/mov,video/quicktime">
                     </div>
 
-                    <button type="submit" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-blue-700 transform hover:scale-[1.01] transition-all flex items-center justify-center gap-2">
-                        <span>🚀 ANALISAR AGORA</span>
+                    <button type="submit" class="w-full bg-lime-400 hover:bg-lime-500 text-slate-950 font-black py-4 rounded-xl shadow-[0_0_20px_rgba(163,230,53,0.3)] hover:shadow-[0_0_30px_rgba(163,230,53,0.5)] transform hover:scale-[1.01] transition-all flex items-center justify-center gap-2 uppercase tracking-wider text-sm">
+                        <span>🚀 Processar Dados</span>
                     </button>
                 </form>
             </div>
 
-            <div id="resultsSection" class="hidden mt-12 text-left animate-fade-in-up">
-                <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
-                    <div class="bg-gray-900 text-white p-6 flex justify-between items-center">
-                        <h3 class="text-xl font-bold">Relatório de Performance</h3>
-                        <span class="bg-green-500 text-xs font-bold px-2 py-1 rounded text-white">CONCLUÍDO</span>
+            <div id="resultsSection" class="hidden mt-16 text-left">
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
+                    <div class="bg-slate-950 border-b border-slate-800 p-6 flex justify-between items-center">
+                        <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-chart-line text-lime-400"></i> Relatório Técnico
+                        </h3>
+                        <span class="bg-lime-400/10 border border-lime-400/20 text-lime-400 text-[10px] font-bold px-3 py-1 rounded-full">STATUS: CONCLUÍDO</span>
                     </div>
                     
                     <div class="p-6 md:p-8">
-                        <div class="mb-8 bg-black rounded-xl overflow-hidden aspect-video flex items-center justify-center shadow-inner">
+                        <div class="mb-8 bg-black rounded-xl overflow-hidden aspect-video flex items-center justify-center shadow-inner border border-slate-800">
                             <video id="videoResult" controls class="w-full h-full object-contain"></video>
                         </div>
 
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                            <div class="bg-blue-50 p-4 rounded-xl text-center">
-                                <p class="text-xs text-gray-500 uppercase font-bold tracking-wider">Altura</p>
-                                <p id="resAltura" class="text-3xl font-bold text-blue-600">-- cm</p>
+                            <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700 text-center">
+                                <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-1">Altura</p>
+                                <p id="resAltura" class="text-3xl font-bold text-lime-400 font-mono">-- cm</p>
                             </div>
-                            <div class="bg-purple-50 p-4 rounded-xl text-center">
-                                <p class="text-xs text-gray-500 uppercase font-bold tracking-wider">Dip (Ângulo)</p>
-                                <p id="resDip" class="text-3xl font-bold text-purple-600">--°</p>
+                            <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700 text-center">
+                                <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-1">Dip (Ângulo)</p>
+                                <p id="resDip" class="text-3xl font-bold text-purple-400 font-mono">--°</p>
                             </div>
-                            <div class="bg-green-50 p-4 rounded-xl text-center">
-                                <p class="text-xs text-gray-500 uppercase font-bold tracking-wider">Explosão</p>
-                                <p id="resExtensao" class="text-3xl font-bold text-green-600">--°</p>
+                            <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700 text-center">
+                                <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-1">Explosão</p>
+                                <p id="resExtensao" class="text-3xl font-bold text-blue-400 font-mono">--°</p>
                             </div>
-                            <div class="bg-yellow-50 p-4 rounded-xl text-center">
-                                <p class="text-xs text-gray-500 uppercase font-bold tracking-wider">Ritmo</p>
-                                <p id="resTempo" class="text-3xl font-bold text-yellow-600">-- s</p>
+                            <div class="bg-slate-800/50 p-4 rounded-xl border border-slate-700 text-center">
+                                <p class="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-1">Ritmo</p>
+                                <p id="resTempo" class="text-3xl font-bold text-yellow-400 font-mono">-- s</p>
                             </div>
                         </div>
 
-                        <div class="border-t border-gray-200 my-6"></div>
+                        <div class="border-t border-slate-800 my-8"></div>
 
-                        <div class="prose max-w-none text-gray-700">
-                            <h4 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                                <i class="fa-solid fa-brain text-purple-600"></i> Análise do Treinador IA
+                        <div class="prose prose-invert max-w-none">
+                            <h4 class="text-lg font-bold text-white mb-6 flex items-center gap-2">
+                                <i class="fa-solid fa-brain text-purple-500"></i> Análise Neural do Treinador
                             </h4>
-                            <div id="resPlano" class="bg-gray-50 p-6 rounded-xl border border-gray-100 text-sm leading-relaxed whitespace-pre-line">
+                            <div id="resPlano" class="bg-slate-950 p-8 rounded-xl border border-slate-800 text-slate-300 text-sm leading-relaxed whitespace-pre-line font-mono">
                                 </div>
                         </div>
 
-                        <div class="mt-8 bg-gradient-to-r from-blue-600 to-indigo-700 rounded-xl p-6 text-white text-center shadow-lg">
-                            <h3 class="text-xl font-bold mb-2">Quer o Plano Completo de 30 Dias?</h3>
-                            <p class="text-blue-100 mb-6 text-sm">Receba a planilha detalhada com séries, repetições e vídeos dos exercícios corretivos para o seu caso.</p>
-                            <a id="buyButton" href="https://pay.kiwify.com.br/eQqooc2" target="_blank" class="inline-block bg-white text-blue-700 font-bold py-3 px-8 rounded-full hover:bg-gray-100 transition shadow-md hover:shadow-lg transform hover:-translate-y-0.5">
-                                👉 Desbloquear Treino (R$ 19,90)
+                        <div class="mt-10 bg-gradient-to-r from-blue-600 to-indigo-700 rounded-xl p-8 text-white text-center shadow-lg relative overflow-hidden group">
+                            <div class="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                            
+                            <h3 class="text-2xl font-black mb-2 tracking-tight">Desbloquear Plano Completo</h3>
+                            <p class="text-blue-100 mb-8 text-sm max-w-md mx-auto">Acesso imediato à planilha de periodização, vídeos corretivos e cronograma de 4 semanas.</p>
+                            
+                            <a id="buyButton" href="https://pay.kiwify.com.br/eQqooc2" target="_blank" class="inline-block bg-white text-blue-700 font-black py-4 px-10 rounded-full hover:bg-gray-100 transition shadow-xl transform hover:-translate-y-1 hover:shadow-2xl">
+                                👉 LIBERAR TREINO (R$ 19,90)
                             </a>
                         </div>
                     </div>
@@ -145,53 +175,57 @@
         </section>
     </main>
 
-    <footer class="bg-white border-t border-gray-200 mt-12 py-8">
-        <div class="max-w-4xl mx-auto px-4 text-center text-gray-400 text-sm">
-            <p>&copy; 2025 JumpPro Analytics. Todos os direitos reservados.</p>
+    <footer class="bg-slate-950 border-t border-slate-900 mt-12 py-10">
+        <div class="max-w-4xl mx-auto px-4 text-center">
+            <div class="flex items-center justify-center gap-2 mb-4 opacity-50">
+                <span class="w-6 h-6 bg-slate-800 rounded flex items-center justify-center text-[10px] text-white font-bold">S</span>
+                <span class="text-sm font-bold text-slate-500">STOUT.IO</span>
+            </div>
+            <p class="text-slate-600 text-xs">&copy; 2025 STOUT Technologies. Todos os direitos reservados.</p>
         </div>
     </footer>
 
     <div id="instructionModal" class="modal opacity-0 pointer-events-none fixed w-full h-full top-0 left-0 flex items-center justify-center z-50">
-        <div class="modal-overlay absolute w-full h-full bg-gray-900 opacity-50"></div>
+        <div class="modal-overlay absolute w-full h-full bg-black/80 backdrop-blur-sm"></div>
         
-        <div class="modal-container bg-white w-11/12 md:max-w-md mx-auto rounded shadow-lg z-50 overflow-y-auto">
+        <div class="modal-container bg-slate-900 border border-slate-700 w-11/12 md:max-w-md mx-auto rounded-2xl shadow-2xl z-50 overflow-y-auto">
             
-            <div class="modal-content py-4 text-left px-6">
-                <div class="flex justify-between items-center pb-3">
-                    <p class="text-2xl font-bold text-gray-800">⚠️ Como deve ser seu vídeo</p>
+            <div class="modal-content py-6 text-left px-6">
+                <div class="flex justify-between items-center pb-4 border-b border-slate-800">
+                    <p class="text-xl font-bold text-white">⚠️ Calibragem do Vídeo</p>
                     <div class="modal-close cursor-pointer z-50" onclick="toggleModal()">
-                        <i class="fas fa-times text-gray-500 hover:text-gray-700"></i>
+                        <i class="fas fa-times text-slate-500 hover:text-white transition"></i>
                     </div>
                 </div>
 
-                <div class="my-5 text-gray-600 space-y-4 text-sm">
-                    <div class="flex gap-3">
-                        <div class="text-2xl">📐</div>
+                <div class="my-6 text-slate-300 space-y-5 text-sm">
+                    <div class="flex gap-4">
+                        <div class="text-2xl w-8">📐</div>
                         <div>
-                            <strong class="text-gray-800 block">1. Enquadramento e Posição</strong>
-                            <p>Celular no chão ou suporte baixo. <br>Corpo inteiro visível. <br>Fique de <strong>PERFIL</strong> (lado).</p>
+                            <strong class="text-white block mb-1">Enquadramento</strong>
+                            <p class="text-slate-400">Celular no chão ou suporte baixo. Grave de <strong>PERFIL</strong>.</p>
                         </div>
                     </div>
                     
-                    <div class="flex gap-3">
-                        <div class="text-2xl">🛑</div>
+                    <div class="flex gap-4">
+                        <div class="text-2xl w-8">🛑</div>
                         <div>
-                            <strong class="text-gray-800 block">2. Início da Ação</strong>
-                            <p>Antes de saltar, fique <strong>IMÓVEL</strong> por 2 segundos. Isso é essencial para a IA calibrar.</p>
+                            <strong class="text-white block mb-1">Estática</strong>
+                            <p class="text-slate-400">Fique <strong>IMÓVEL</strong> por 2 segundos antes de saltar. (Calibragem)</p>
                         </div>
                     </div>
 
-                    <div class="flex gap-3">
-                        <div class="text-2xl">✂️</div>
+                    <div class="flex gap-4">
+                        <div class="text-2xl w-8">✂️</div>
                         <div>
-                            <strong class="text-gray-800 block">3. Edição do Vídeo</strong>
-                            <p>Corte o vídeo para começar na pausa e terminar logo após a aterrissagem.</p>
+                            <strong class="text-white block mb-1">Edição</strong>
+                            <p class="text-slate-400">Corte o vídeo. Mande apenas o momento do salto (Max 10s).</p>
                         </div>
                     </div>
                 </div>
 
-                <div class="flex justify-end pt-2">
-                    <button id="confirmUploadBtn" class="px-6 py-3 p-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold w-full">
+                <div class="pt-2">
+                    <button id="confirmUploadBtn" class="w-full py-3 rounded-lg bg-lime-400 hover:bg-lime-500 text-slate-900 font-bold transition">
                         Entendi, selecionar vídeo
                     </button>
                 </div>
@@ -200,119 +234,111 @@
     </div>
 
     <script>
-    // --- CONFIGURAÇÃO ---
-    const API_URL = "https://motor-ia-832830832022.us-central1.run.app/analisar_salto/";
+        // --- CONFIGURAÇÃO ---
+        const API_URL = "https://motor-ia-832830832022.us-central1.run.app/analisar_salto/";
 
-    // Lógica do Modal
-    const uploadTrigger = document.getElementById('uploadTrigger');
-    const modal = document.getElementById('instructionModal');
-    const confirmBtn = document.getElementById('confirmUploadBtn');
-    const realInput = document.getElementById('video');
-    const fileNameDisplay = document.getElementById('fileName');
+        // Lógica do Modal e Upload
+        const uploadTrigger = document.getElementById('uploadTrigger');
+        const modal = document.getElementById('instructionModal');
+        const confirmBtn = document.getElementById('confirmUploadBtn');
+        const realInput = document.getElementById('video');
+        const fileNameDisplay = document.getElementById('fileName');
 
-    function toggleModal() {
-        modal.classList.toggle('opacity-0');
-        modal.classList.toggle('pointer-events-none');
-        document.body.classList.toggle('modal-active');
-    }
-
-    uploadTrigger.addEventListener('click', toggleModal);
-
-    confirmBtn.addEventListener('click', function() {
-        toggleModal();
-        realInput.click(); // Abre o seletor de arquivos real
-    });
-
-    // Quando o usuário seleciona o arquivo
-    realInput.addEventListener('change', function(e) {
-        if(this.files && this.files.length > 0) {
-            fileNameDisplay.textContent = "✅ " + this.files[0].name;
-            fileNameDisplay.classList.add("text-green-600");
+        function toggleModal() {
+            modal.classList.toggle('opacity-0');
+            modal.classList.toggle('pointer-events-none');
+            document.body.classList.toggle('modal-active');
         }
-    });
 
-    // Lógica de Envio
-    document.getElementById('jumpForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        // Validação simples
-        const videoFile = realInput.files[0];
-        if (!videoFile) { alert("Por favor, selecione um vídeo!"); return; }
+        uploadTrigger.addEventListener('click', toggleModal);
 
-        // Mostrar Loading
-        const loadingOverlay = document.getElementById('loadingOverlay');
-        loadingOverlay.classList.remove('hidden');
-        loadingOverlay.classList.add('flex');
+        confirmBtn.addEventListener('click', function() {
+            toggleModal();
+            realInput.click();
+        });
 
-        // Preparar Dados
-        const formData = new FormData();
-        formData.append('video', videoFile);
-        formData.append('nome', document.getElementById('nome').value);
-        formData.append('email', document.getElementById('email').value);
-        formData.append('telefone', document.getElementById('telefone').value);
-        formData.append('altura_user', document.getElementById('altura_user').value);
-
-        try {
-            const response = await fetch(API_URL, {
-                method: 'POST',
-                body: formData
-            });
-
-            if (!response.ok) {
-                throw new Error('Erro na análise. Verifique se o vídeo segue as regras.');
+        realInput.addEventListener('change', function(e) {
+            if(this.files && this.files.length > 0) {
+                fileNameDisplay.textContent = "✅ " + this.files[0].name;
+                fileNameDisplay.classList.add("text-lime-400");
             }
+        });
 
-            const data = await response.json();
+        // Lógica de Envio e Renderização (MANTIDA IGUAL, SÓ VISUAL MUDOU)
+        document.getElementById('jumpForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
             
-            // Preencher Resultados
-            if (data.status === "ok") {
-                document.getElementById('resAltura').textContent = data.metricas.altura.toFixed(1) + " cm";
-                document.getElementById('resDip').textContent = Math.round(data.metricas.dip) + "°";
-                document.getElementById('resExtensao').textContent = Math.round(data.metricas.extensao) + "°";
-                document.getElementById('resTempo').textContent = data.metricas.tempo.toFixed(2) + " s";
+            const videoFile = realInput.files[0];
+            if (!videoFile) { alert("Por favor, selecione um vídeo!"); return; }
+
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            loadingOverlay.classList.remove('hidden');
+            loadingOverlay.classList.add('flex');
+
+            const formData = new FormData();
+            formData.append('video', videoFile);
+            formData.append('nome', document.getElementById('nome').value);
+            formData.append('email', document.getElementById('email').value);
+            formData.append('telefone', document.getElementById('telefone').value);
+            formData.append('altura_user', document.getElementById('altura_user').value);
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error('Erro na análise. Verifique se o vídeo segue as regras.');
+                }
+
+                const data = await response.json();
                 
-                // Lógica do Paywall: Procura a string '<h3>📅' para garantir o corte no início da seção 3.
-                let textoCompleto = data.plano; 
-                const splitMarker = "<h3>📅"; // NOVO MARCADOR ROBUSTO
-                let textoExibido;
+                if (data.status === "ok") {
+                    document.getElementById('resAltura').textContent = data.metricas.altura.toFixed(1) + " cm";
+                    document.getElementById('resDip').textContent = Math.round(data.metricas.dip) + "°";
+                    document.getElementById('resExtensao').textContent = Math.round(data.metricas.extensao) + "°";
+                    document.getElementById('resTempo').textContent = data.metricas.tempo.toFixed(2) + " s";
+                    
+                    // Lógica do Paywall com HTML
+                    let textoCompleto = data.plano;
+                    const splitMarker = "<h3>📅"; 
+                    let textoExibido;
 
-                const splitIndex = textoCompleto.indexOf(splitMarker); 
+                    const splitIndex = textoCompleto.indexOf(splitMarker); 
 
-                if (splitIndex !== -1) {
-                    // Se encontrou o marcador, corta o texto ANTES da tag <h3>📅
-                    textoExibido = textoCompleto.substring(0, splitIndex); 
+                    if (splitIndex !== -1) {
+                        textoExibido = textoCompleto.substring(0, splitIndex); 
+                    } else {
+                        textoExibido = textoCompleto;
+                    }
+
+                    // Paywall Dark Mode
+                    textoExibido += "<hr style='margin-top:20px; border:0; border-top: 2px dashed #475569;'><p style='font-weight:bold; color:#ef4444; margin-top:10px;'>🔒 O PLANO DE AÇÃO DE 4 SEMANAS ESTÁ BLOQUEADO.</p>";
+                    textoExibido += "<p style='color:#94a3b8'>Realize o pagamento abaixo para liberar o treino completo e a planilha.</p>";
+
+                    document.getElementById('resPlano').innerHTML = textoExibido;
+                    
+                    if (data.video_base64) {
+                        const videoBlob = await (await fetch(`data:video/mp4;base64,${data.video_base64}`)).blob();
+                        const videoUrl = URL.createObjectURL(videoBlob);
+                        document.getElementById('videoResult').src = videoUrl;
+                    }
+
+                    document.getElementById('resultsSection').classList.remove('hidden');
+                    document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
                 } else {
-                    // Fallback (se o formato do Gemini mudar): Mostra tudo.
-                    textoExibido = textoCompleto;
+                    alert("Ocorreu um erro inesperado na resposta da IA.");
                 }
 
-                // Adiciona o paywall em HTML
-                textoExibido += "<hr style='margin-top:20px; border:0; border-top: 2px dashed #ccc;'><p style='font-weight:bold; color:#cc0000;'>🔒 O PLANO DE AÇÃO DE 4 SEMANAS ESTÁ BLOQUEADO.</p>";
-                textoExibido += "<p>Realize o pagamento abaixo para liberar o treino completo e a planilha.</p>";
-
-                document.getElementById('resPlano').innerHTML = textoExibido;
-                
-                // Exibir Vídeo
-                if (data.video_base64) {
-                    const videoBlob = await (await fetch(`data:video/mp4;base64,${data.video_base64}`)).blob();
-                    const videoUrl = URL.createObjectURL(videoBlob);
-                    document.getElementById('videoResult').src = videoUrl;
-                }
-
-                document.getElementById('resultsSection').classList.remove('hidden');
-                document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
-            } else {
-                alert("Ocorreu um erro inesperado na resposta da IA.");
+            } catch (error) {
+                console.error(error);
+                alert("Erro ao conectar com o servidor: " + error.message);
+            } finally {
+                loadingOverlay.classList.add('hidden');
+                loadingOverlay.classList.remove('flex');
             }
-
-        } catch (error) {
-            console.error(error);
-            alert("Erro ao conectar com o servidor: " + error.message);
-        } finally {
-            loadingOverlay.classList.add('hidden');
-            loadingOverlay.classList.remove('flex');
-        }
-    });
-</script>
+        });
+    </script>
 </body>
 </html>
