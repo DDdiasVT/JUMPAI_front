@@ -51,21 +51,25 @@
             <div id="authScreen">
                 <h3 class="text-2xl font-bold mb-4 text-center text-gray-800">Acesso Restrito - Use Seus Créditos</h3>
                 
+                <div class="flex border-b border-gray-200 mb-6">
+                    <button id="loginTabBtn" class="py-3 px-6 text-sm font-medium border-b-2 border-indigo-500 text-indigo-600 transition-colors duration-150">
+                        1. Entrar (Login)
+                    </button>
+                    <button id="registerTabBtn" class="py-3 px-6 text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors duration-150">
+                        2. Criar Conta
+                    </button>
+                </div>
+
                 <form id="loginForm" class="space-y-4">
                     <input type="email" id="loginEmail" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500" placeholder="E-mail">
                     <input type="password" id="loginPassword" required class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500" placeholder="Senha">
                     <button type="submit" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-xl hover:bg-indigo-700 transition">ENTRAR</button>
                 </form>
 
-                <p class="mt-4 text-center text-sm" id="authToggleMessage">
-                    <a href="#" id="showRegisterLink" class="text-blue-600 hover:text-blue-800">Não tem conta? Crie uma agora!</a>
-                </p>
-
-                <form id="registerForm" class="space-y-4 mt-6 hidden">
-                    <h4 class="text-xl font-bold mb-2 text-gray-700 text-center">Novo Usuário (Bônus: 5 Créditos)</h4>
+                <form id="registerForm" class="space-y-4 hidden">
                     <input type="email" id="registerEmail" required class="w-full px-4 py-3 rounded-lg border border-gray-300" placeholder="E-mail">
                     <input type="password" id="registerPassword" required class="w-full px-4 py-3 rounded-lg border border-gray-300" placeholder="Senha">
-                    <button type="submit" class="w-full bg-green-600 text-white font-bold py-3 rounded-xl hover:bg-green-700 transition">CADASTRAR</button>
+                    <button type="submit" class="w-full bg-green-600 text-white font-bold py-3 rounded-xl hover:bg-green-700 transition">CADASTRAR (5 Créditos Bônus)</button>
                 </form>
             </div>
             <form id="jumpForm" class="space-y-6 hidden"> 
@@ -116,7 +120,7 @@
             </div>
 
         <div id="resultsSection" class="hidden mt-12 text-left animate-fade-in-up">
-            <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+             <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
                 <div class="bg-gray-900 text-white p-6 flex justify-between items-center">
                     <h3 class="text-xl font-bold">Relatório de Performance</h3>
                     <span class="bg-green-500 text-xs font-bold px-2 py-1 rounded text-white">CONCLUÍDO</span>
@@ -174,7 +178,6 @@
 
 <script>
     // --- CONFIGURAÇÃO ---
-    // URL DE PRODUÇÃO DO SEU CLOUD RUN
     const API_BASE_URL = "https://motor-ia-832830832022.us-central1.run.app"; 
     const API_ANALISE_URL = `${API_BASE_URL}/analisar_salto/`;
 
@@ -183,6 +186,8 @@
     const jumpForm = document.getElementById('jumpForm');
     const loginForm = document.getElementById('loginForm');
     const registerForm = document.getElementById('registerForm');
+    const loginTabBtn = document.getElementById('loginTabBtn'); // NOVO
+    const registerTabBtn = document.getElementById('registerTabBtn'); // NOVO
     const loadingOverlay = document.getElementById('loadingOverlay');
     const statusHeader = document.getElementById('statusHeader');
     const userEmailDisplay = document.getElementById('userEmailDisplay');
@@ -191,7 +196,6 @@
     const fileInput = document.getElementById('video');
     const logoutBtn = document.getElementById('logoutBtn');
     const headerActionBtn = document.getElementById('headerActionBtn');
-    const authToggleMessage = document.getElementById('authToggleMessage');
     const emailInputForm = document.getElementById('email');
 
     // --- FUNÇÃO CENTRAL DE REQUISIÇÃO (LIDANDO COM X-WWW-FORM-URLENCODED) ---
@@ -207,7 +211,6 @@
             const data = await response.json();
             
             if (!response.ok) {
-                // Captura erro 401, 409 etc.
                 throw new Error(data.detail || data.mensagem || 'Erro desconhecido na API.');
             }
             return data;
@@ -227,13 +230,32 @@
         checkAuthStatus();
     }
 
+    // FUNÇÃO NOVO: GERENCIAR ABAS
+    function showAuthTab(tabName) {
+        if (tabName === 'login') {
+            loginForm.classList.remove('hidden');
+            registerForm.classList.add('hidden');
+            loginTabBtn.classList.add('border-indigo-500', 'text-indigo-600');
+            loginTabBtn.classList.remove('border-transparent', 'text-gray-500');
+            registerTabBtn.classList.add('border-transparent', 'text-gray-500');
+            registerTabBtn.classList.remove('border-indigo-500', 'text-indigo-600');
+        } else {
+            loginForm.classList.add('hidden');
+            registerForm.classList.remove('hidden');
+            registerTabBtn.classList.add('border-indigo-500', 'text-indigo-600');
+            registerTabBtn.classList.remove('border-transparent', 'text-gray-500');
+            loginTabBtn.classList.add('border-transparent', 'text-gray-500');
+            loginTabBtn.classList.remove('border-indigo-500', 'text-indigo-600');
+        }
+    }
+
     function checkAuthStatus() {
         const token = localStorage.getItem('access_token');
         const email = localStorage.getItem('user_email');
         const credits = localStorage.getItem('user_credits');
 
         if (token && email) {
-            // USUÁRIO LOGADO
+            // USUÁRIO LOGADO: MOSTRA O FORM DE ANÁLISE
             authScreen.classList.add('hidden');
             jumpForm.classList.remove('hidden');
             statusHeader.classList.remove('hidden');
@@ -241,14 +263,14 @@
             // Atualiza UI
             userEmailDisplay.textContent = email;
             creditBalanceDisplay.textContent = credits || 'N/A';
-            emailInputForm.value = email; // Preenche o campo email (desabilitado)
+            emailInputForm.value = email; 
 
             headerActionBtn.textContent = `Saldo: ${credits} créditos`;
             headerActionBtn.classList.remove('bg-blue-600');
             headerActionBtn.classList.add('bg-green-600');
 
         } else {
-            // USUÁRIO DESLOGADO
+            // USUÁRIO DESLOGADO: MOSTRA A TELA DE LOGIN/CADASTRO
             authScreen.classList.remove('hidden');
             jumpForm.classList.add('hidden');
             statusHeader.classList.add('hidden');
@@ -256,6 +278,8 @@
             headerActionBtn.textContent = 'FAZER LOGIN';
             headerActionBtn.classList.remove('bg-green-600');
             headerActionBtn.classList.add('bg-blue-600');
+
+            showAuthTab('login'); // Por padrão, sempre inicia na aba de Login (ABA 1)
         }
     }
 
@@ -270,18 +294,13 @@
         formData.append('email', email);
         formData.append('password', password);
 
-        const data = await apiRequest('/token', formData, true); // isLogin = true
+        const data = await apiRequest('/token', formData, true); 
         
         if (data && data.access_token) {
             localStorage.setItem('access_token', data.access_token);
             localStorage.setItem('user_email', email);
             
-            // NOTE: Para obter os créditos, idealmente teríamos um /user_info, mas faremos
-            // a primeira chamada ao /analisar_salto/ para forçar a atualização do saldo 
-            // no localStorage. Por enquanto, a checagem básica é suficiente.
-            
-            // O código de login é eficiente, mas para o MVP, vamos assumir 5 créditos 
-            // no primeiro login se o saldo não existir, para a UX ser melhor.
+            // Assume 5 créditos no primeiro login se o saldo não existir localmente para UX
             if (!localStorage.getItem('user_credits')) {
                 localStorage.setItem('user_credits', 5);
             }
@@ -304,10 +323,8 @@
         if (data && data.status === "sucesso") {
             alert(`Cadastro OK! ${data.mensagem}. Faça Login agora.`);
             
-            // Mudar para a tela de login
-            document.getElementById('registerForm').classList.add('hidden');
-            document.getElementById('loginForm').classList.remove('hidden');
-            authToggleMessage.innerHTML = '<a href="#" id="showRegisterLink" class="text-blue-600 hover:text-blue-800">Não tem conta? Crie uma agora!</a>';
+            // Mudar para a aba de login
+            showAuthTab('login');
         }
     });
     
@@ -335,11 +352,10 @@
         const formData = new FormData();
         formData.append('video', videoFile);
         formData.append('nome', document.getElementById('nome').value);
-        formData.append('email', current_email); // O email é pego do localStorage
+        formData.append('email', current_email); 
         formData.append('telefone', document.getElementById('telefone').value);
         formData.append('altura_user', document.getElementById('altura_user').value);
         
-        // O PONTO MAIS CRÍTICO: Enviar o Token
         formData.append('token', token); 
 
         try {
@@ -357,7 +373,7 @@
             }
             if (response.status === 403) {
                  alert(`Créditos Insuficientes. Compre mais créditos!`);
-                 handleLogout(); // Pode forçar o logout para mostrar a tela de compra
+                 // Não faz logout, apenas mostra a tela de login para que o usuário clique em 'Comprar Créditos'
                  return;
             }
 
@@ -367,7 +383,7 @@
 
             // Preencher Resultados
             if (data.status === "ok") {
-                // Atualiza o saldo na interface (pega o valor retornado pelo backend)
+                // Atualiza o saldo
                 localStorage.setItem('user_credits', data.creditos_restantes);
                 creditBalanceDisplay.textContent = data.creditos_restantes;
                 headerActionBtn.textContent = `Saldo: ${data.creditos_restantes} créditos`;
@@ -378,7 +394,6 @@
                 document.getElementById('resExtensao').textContent = Math.round(data.metricas.extensao) + "°";
                 document.getElementById('resTempo').textContent = data.metricas.tempo.toFixed(2) + " s";
                 
-                // Texto do Gemini
                 let planoTexto = data.plano.replace(/\*\*/g, ''); 
                 document.getElementById('resPlano').innerText = planoTexto;
 
@@ -409,26 +424,14 @@
         }
     });
 
-    // Toggle entre Login e Cadastro
-    document.getElementById('authToggleMessage').addEventListener('click', (e) => {
-        e.preventDefault();
-        const isLoginVisible = !document.getElementById('loginForm').classList.contains('hidden');
-        
-        if (isLoginVisible) {
-             // Mudar para Cadastro
-             document.getElementById('registerForm').classList.remove('hidden');
-             document.getElementById('loginForm').classList.add('hidden');
-             e.target.textContent = 'Já sou cliente. Fazer login.';
-        } else {
-             // Mudar para Login
-             document.getElementById('registerForm').classList.add('hidden');
-             document.getElementById('loginForm').classList.remove('hidden');
-             e.target.textContent = 'Não tem conta? Crie uma agora!';
-        }
-    });
-    
+    // Eventos de clique nas abas
+    loginTabBtn.addEventListener('click', () => showAuthTab('login'));
+    registerTabBtn.addEventListener('click', () => showAuthTab('register'));
+
     // Inicialização
-    checkAuthStatus();
+    document.addEventListener('DOMContentLoaded', function() {
+        checkAuthStatus();
+    });
 </script>
 </body> 
 </html>
