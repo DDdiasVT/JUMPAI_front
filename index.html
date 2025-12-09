@@ -183,14 +183,14 @@
                                 <p id="resTempo" class="text-3xl font-bold text-yellow-400 font-mono">-- s</p>
                             </div>
                         </div>
-    
+        
                         <div class="prose prose-invert max-w-none">
                             <h4 class="text-lg font-bold text-white mb-6 flex items-center gap-2">
                                 <i class="fa-solid fa-brain text-purple-500"></i> Análise Neural
                             </h4>
                             <div id="resPlano" class="bg-slate-950 p-8 rounded-xl border border-slate-800 text-slate-300 text-sm leading-relaxed whitespace-pre-line font-mono"></div>
                         </div>
-    
+        
                         <div id="ctaArea" class="mt-10 bg-gradient-to-r from-lime-400 to-emerald-400 rounded-xl p-8 text-slate-950 text-center shadow-lg relative overflow-hidden group">
                             <h3 class="text-2xl font-black mb-2 tracking-tight">Acabaram Seus Créditos?</h3>
                             <p class="text-slate-900 mb-8 text-sm max-w-md mx-auto">Compre mais 5, 10 ou 20 análises para continuar evoluindo.</p>
@@ -201,7 +201,7 @@
                     </div>
                 </div>
             </div>
-            </section>
+        </section>
     </main>
 
     <footer class="bg-slate-950 border-t border-slate-900 mt-12 py-10">
@@ -212,7 +212,8 @@
 
     <script>
         // --- CONFIG ---
-        const BASE_URL = "https://motor-ia-832830832022.us-central1.run.app";
+        // URL DE PRODUÇÃO DO SEU CLOUD RUN
+        const BASE_URL = "https://motor-ia-832830832022.us-central1.run.app"; 
         const API_ANALISE_URL = `${BASE_URL}/analisar_salto/`;
 
         // --- ELEMENTOS UI ---
@@ -236,8 +237,16 @@
 
         // --- FUNÇÕES DE SEGURANÇA E LÓGICA DE NEGÓCIO ---
 
+        // A FUNÇÃO CORRIGIDA: Lida com o erro 404 ao montar a URL
         async function apiRequest(endpoint, formData, isLogin = false) {
-            const url = `${BASE_URL}${endpoint}`;
+            
+            // 1. Limpa as barras extras da URL base
+            const cleanedBaseUrl = BASE_URL.replace(/\/+$/, '');
+            // 2. Garante que o endpoint começa com uma barra
+            const cleanedEndpoint = endpoint.startsWith('/') ? endpoint : '/' + endpoint;
+            
+            const url = cleanedBaseUrl + cleanedEndpoint; 
+            
             try {
                 const response = await fetch(url, {
                     method: 'POST',
@@ -245,6 +254,7 @@
                     body: formData.toString()
                 });
                 const data = await response.json();
+                
                 if (!response.ok) {
                     throw new Error(data.detail || data.mensagem || 'Erro desconhecido na API.');
                 }
@@ -297,7 +307,7 @@
 
                 headerActionBtn.textContent = `Saldo: ${credits} créditos`;
                 headerActionBtn.classList.add('bg-lime-400/10', 'text-lime-400', 'border-lime-400/20');
-                headerActionBtn.classList.remove('bg-red-400/10', 'text-red-400');
+                headerActionBtn.classList.remove('bg-white/5', 'text-white');
             } else {
                 // USUÁRIO DESLOGADO: MOSTRA A TELA DE LOGIN/CADASTRO
                 authScreen.classList.remove('hidden');
@@ -323,7 +333,7 @@
             msgRecuperacao.textContent = "Buscando nos arquivos...";
             msgRecuperacao.className = "text-xs mt-3 h-4 font-mono text-yellow-400 animate-pulse";
 
-            const formData = new FormData();
+            const formData = new URLSearchParams();
             formData.append('token', token);
 
             try {
@@ -362,7 +372,7 @@
                 localStorage.setItem('access_token', data.access_token);
                 localStorage.setItem('user_email', email);
                 
-                // Assume 5 créditos iniciais para a primeira UX
+                // Assume 5 créditos iniciais na primeira UX
                 if (!localStorage.getItem('user_credits')) {
                     localStorage.setItem('user_credits', 5);
                 }
@@ -428,9 +438,9 @@
                     return;
                 }
                 if (response.status === 403) {
-                     alert(`Créditos Insuficientes. Compre mais créditos!`);
-                     // Não faz logout. O usuário precisa ver a tela de compra.
-                     return;
+                    alert(`Créditos Insuficientes. Compre mais créditos!`);
+                    // Não faz logout. O usuário precisa ver a tela de compra.
+                    return;
                 }
 
                 if (!response.ok) {
@@ -439,7 +449,6 @@
 
                 // Preencher Resultados
                 if (data.status === "ok") {
-                    // Atualiza o saldo
                     localStorage.setItem('user_credits', data.creditos_restantes);
                     checkAuthStatus(); // Atualiza o header de saldo
                     
@@ -451,8 +460,8 @@
                     document.getElementById('resPlano').innerText = data.plano.replace(/\*\*/g, ''); 
                     
                     if (data.video_base64) {
-                        const videoUrl = URL.createObjectURL(await (await fetch(`data:video/mp4;base64,${data.video_base64}`)).blob());
-                        document.getElementById('videoResult').src = videoUrl;
+                         const videoUrl = URL.createObjectURL(await (await fetch(`data:video/mp4;base64,${data.video_base64}`)).blob());
+                         document.getElementById('videoResult').src = videoUrl;
                     }
 
                     document.getElementById('analise').classList.add('hidden');
@@ -474,13 +483,17 @@
         registerTabBtn.addEventListener('click', () => showAuthTab('register'));
         logoutBtn.addEventListener('click', handleLogout);
         
-        document.getElementById('uploadTrigger').addEventListener('click', toggleModal);
-        document.getElementById('confirmUploadBtn').addEventListener('click', () => { toggleModal(); document.getElementById('video').click(); });
+        document.getElementById('uploadTrigger').addEventListener('click', () => document.getElementById('video').click());
         document.getElementById('video').addEventListener('change', function() {
             if(this.files[0]) { document.getElementById('fileName').textContent = "✅ " + this.files[0].name; }
         });
 
-        // Inicialização
+        // Eventos para as abas de Login/Cadastro (dentro do authScreen)
+        loginTabBtn.addEventListener('click', () => showAuthTab('login'));
+        registerTabBtn.addEventListener('click', () => showAuthTab('register'));
+
+
+        // Inicialização: Verifica o token na carga da página
         document.addEventListener('DOMContentLoaded', checkAuthStatus);
     </script>
 </body>
